@@ -12,7 +12,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed": "bash scripts/seed-flag.sh"
   },
   "dependencies": {
     "@unleash/proxy-client-react": "^6.0.0",
