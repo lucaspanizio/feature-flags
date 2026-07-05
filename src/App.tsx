@@ -1,12 +1,13 @@
-import { useState } from 'react'
 import { useFlag, useFlagsStatus, useUnleashContext } from '@unleash/proxy-client-react'
+import { useState } from 'react'
+
+import { Page } from './components/Page'
+import { Example } from './components/Example'
+import { StatusDot } from './components/StatusDot'
 
 const FLAG_NAME = 'feature-example'
 const VIP_FLAG_NAME = 'vip-email'
 const VIP_DOMAIN = '@vip.com'
-const CARD = 'flex flex-col items-center justify-center flex-1'
-const EXAMPLE = 'relative w-full max-w-lg rounded-lg border border-gray-700 p-6'
-const LEGEND = 'px-2 text-xs text-gray-500'
 
 const UNLEASH_URL = import.meta.env.VITE_UNLEASH_URL
 
@@ -24,24 +25,22 @@ export function App() {
   }
 
   if (!flagsReady) {
-    return <div className={CARD}>Carregando flags do Unleash...</div>
+    return <Page>Carregando flags do Unleash...</Page>
   }
 
   if (flagsError) {
-    return <div className={CARD}>Erro ao falar com o Unleash: {String(flagsError)}</div>
+    return <Page>Erro ao falar com o Unleash: {String(flagsError)}</Page>
   }
 
   return (
-    <div className={CARD}>
-      <fieldset className={EXAMPLE}>
-        <legend className={LEGEND}>{FLAG_NAME}</legend>
+    <Page>
+      <Example name={FLAG_NAME}>
+        <StatusDot active={enabled} />
 
-        <div className="absolute top-2 right-4 flex items-center gap-2 text-sm">
-          <span className={`h-2.5 w-2.5 rounded-full ${enabled ? 'bg-green-500' : 'bg-gray-400'}`} />
-          <span>{enabled ? 'Ativa' : 'Desativada'}</span>
-        </div>
-
-        <button className={`mb-4 rounded-lg border-none px-6 py-3 text-[1.1rem] text-white cursor-pointer transition-colors duration-200 ${enabled ? 'bg-violet-700' : 'bg-gray-500'}`}>
+        <button
+          data-active={enabled}
+          className="mb-4 rounded-lg border-none bg-gray-500 px-6 py-3 text-[1.1rem] text-white cursor-pointer transition-colors duration-200 data-[active=true]:bg-violet-700"
+        >
           {enabled ? '✨ Botão novo' : 'Botão antigo'}
         </button>
 
@@ -52,11 +51,9 @@ export function App() {
           </a><br />
           (Feature flags → {FLAG_NAME} → ambiente development)
         </p>
-      </fieldset>
+      </Example>
 
-      <fieldset className={`${EXAMPLE} mt-8 flex flex-col items-center gap-3`}>
-        <legend className={LEGEND}>{VIP_FLAG_NAME}</legend>
-
+      <Example name={VIP_FLAG_NAME} className="mt-8 flex flex-col items-center gap-3">
         <p className="text-[0.85rem] text-gray-500">
           Digite um e-mail e clique em Enviar <br />(termine com <code>{VIP_DOMAIN}</code> pra ligar a
           flag <code>{VIP_FLAG_NAME}</code>)
@@ -80,11 +77,14 @@ export function App() {
         </form>
 
         {submitted && (
-          <div className={`w-full rounded-lg px-6 py-4 text-center text-white transition-colors duration-200 ${isVip ? 'bg-violet-700' : 'bg-gray-500'}`}>
+          <div
+            data-active={isVip}
+            className="w-full rounded-lg bg-gray-500 px-6 py-4 text-center text-white transition-colors duration-200 data-[active=true]:bg-violet-700"
+          >
             {isVip ? `🎉  UI VIP` : 'UI padrão'}
           </div>
         )}
-      </fieldset>
-    </div>
+      </Example>
+    </Page>
   )
 }
