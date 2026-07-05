@@ -1,8 +1,14 @@
 {
-  "name": "demo-react-app",
+  "name": "feature-flags",
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "author": "José Lucas Panizio",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lucaspanizio/feature-flags.git"
+  },
+  "description": "POC de feature flags self-hosted com Unleash + PostgreSQL (Docker Compose) e uma app React de demonstração.",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
