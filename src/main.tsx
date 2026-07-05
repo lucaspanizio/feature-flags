@@ -2,7 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { FlagProvider, type IConfig } from '@unleash/proxy-client-react'
 import './index.css'
-import App from './App.tsx'
+import { App } from './App.tsx'
 
 const config: IConfig = {
   url: `${import.meta.env.VITE_UNLEASH_URL}/api/frontend`,
