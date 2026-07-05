@@ -1,7 +1,0 @@
-{
-    "require": {
-        "unleash/client": "^4.0",
-        "guzzlehttp/guzzle": "^7.0",
-        "symfony/cache": "^6.0"
-    }
-}
