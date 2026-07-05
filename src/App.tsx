@@ -1,32 +1,33 @@
 import { useFlag, useFlagsStatus } from '@unleash/proxy-client-react'
-import './App.css'
 
 const FLAG_NAME = 'minha-feature-exemplo'
+const CARD = 'max-w-lg mx-auto my-16 p-8 text-center font-sans'
+const BTN = 'mt-4 rounded-lg border-none px-6 py-3 text-[1.1rem] text-white cursor-pointer transition-colors duration-200'
 
 function App() {
   const enabled = useFlag(FLAG_NAME)
   const { flagsReady, flagsError } = useFlagsStatus()
 
   if (!flagsReady) {
-    return <div className="card">Carregando flags do Unleash...</div>
+    return <div className={CARD}>Carregando flags do Unleash...</div>
   }
 
   if (flagsError) {
-    return <div className="card">Erro ao falar com o Unleash: {String(flagsError)}</div>
+    return <div className={CARD}>Erro ao falar com o Unleash: {String(flagsError)}</div>
   }
 
   return (
-    <div className="card">
+    <div className={CARD}>
       <h1>Demo Unleash + React</h1>
       <p>
         Flag <code>{FLAG_NAME}</code>: <strong>{enabled ? 'ligada' : 'desligada'}</strong>
       </p>
 
-      <button className={(enabled ? 'btn btn-new' : 'btn btn-old')}>
+      <button className={`${BTN} ${enabled ? 'bg-violet-700' : 'bg-gray-500'}`}>
         {enabled ? '✨ Botão novo (feature ativa)' : 'Botão antigo'}
       </button>
 
-      <p className="hint">
+      <p className="mt-6 text-[0.85rem] text-gray-500">
         Troque a flag <code>{FLAG_NAME}</code> em{' '}
         <a href="http://localhost:4242" target="_blank" rel="noreferrer">
           http://localhost:4242
