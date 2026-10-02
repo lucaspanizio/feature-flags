@@ -12,9 +12,14 @@ set -eu
 
 cd "$(dirname "$0")/.." 2>/dev/null || true
 if [ -f .env ]; then
+  # Remove BOM e CR do .env antes de carregar: no Windows o .env costuma vir com CRLF (herdado do
+  # .env.example) e o \r acabaria grudado no fim de cada valor, inclusive na senha do admin.
+  ENV_CLEAN="$(mktemp)"
+  sed -e '1s/^\xEF\xBB\xBF//' -e 's/\r$//' .env > "$ENV_CLEAN"
   set -a
-  . ./.env
+  . "$ENV_CLEAN"
   set +a
+  rm -f "$ENV_CLEAN"
 fi
 
 UNLEASH_URL="${UNLEASH_URL:-http://localhost:4242}"
@@ -23,10 +28,16 @@ ADMIN_PASSWORD="${UNLEASH_ADMIN_PASSWORD:-admin}"
 COOKIE_JAR="$(mktemp)"
 trap 'rm -f "$COOKIE_JAR"' EXIT
 
-curl -sf -c "$COOKIE_JAR" -X POST "$UNLEASH_URL/auth/simple/login" \
+if ! curl -sf -c "$COOKIE_JAR" -X POST "$UNLEASH_URL/auth/simple/login" \
   -H "Content-Type: application/json" \
   -d "{\"username\":\"$ADMIN_USERNAME\",\"password\":\"$ADMIN_PASSWORD\"}" \
-  > /dev/null
+  > /dev/null; then
+  echo "ERRO: login no Unleash ($UNLEASH_URL) falhou para o usuário '$ADMIN_USERNAME'." >&2
+  echo "  - Unleash fora do ar ou URL errada? Confira 'docker compose ps' e o UNLEASH_URL." >&2
+  echo "  - Unleash no ar? Então a UNLEASH_ADMIN_PASSWORD do .env difere da gravada no volume do" >&2
+  echo "    Postgres (criado numa subida anterior). Veja 'Solução de problemas' no README." >&2
+  exit 1
+fi
 
 create_feature() {
   name="$1"
