@@ -4,6 +4,9 @@ POC para entender na prática como funcionaria um serviço self-hosted de featur
 [Unleash](https://www.getunleash.io/) (open-source) + PostgreSQL, com uma app de demonstração em
 React que liga/desliga uma feature em tempo real através da Admin UI do Unleash.
 
+<img width="1366" height="633" alt="image" src="https://github.com/user-attachments/assets/518185f2-da9b-4100-a761-d55d61576c3c" />
+<img width="1366" height="633" alt="image" src="https://github.com/user-attachments/assets/364a22d0-1c16-47fe-a589-6365798188ad" />
+
 ## Tecnologias
 
 - **[Unleash](https://www.getunleash.io/)** — servidor de feature flags (Admin UI + API).
