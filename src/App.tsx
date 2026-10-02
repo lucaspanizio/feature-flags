@@ -14,8 +14,11 @@ const UNLEASH_URL = import.meta.env.VITE_UNLEASH_URL
 export function App() {
   const enabled = useFlag(FLAG_NAME)
   const isVip = useFlag(VIP_FLAG_NAME)
+  
   const { flagsReady, flagsError } = useFlagsStatus()
+
   const updateContext = useUnleashContext()
+
   const [email, setEmail] = useState('')
   const [submitted, setSubmitted] = useState(false)
 

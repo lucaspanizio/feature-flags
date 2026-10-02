@@ -25,7 +25,10 @@ React que liga/desliga uma feature em tempo real através da Admin UI do Unleash
 
    ```bash
    cp .env.example .env
-   # edite o .env: troque DATABASE_PASSWORD, UNLEASH_ADMIN_PASSWORD e os tokens INIT_*
+   # edite o .env: troque DATABASE_PASSWORD e UNLEASH_ADMIN_PASSWORD. Os tokens de exemplo já
+   # servem para dev local (VITE_UNLEASH_FRONTEND_TOKEN já vem igual ao INIT_FRONTEND_API_TOKENS).
+   # Atenção: essas senhas ficam gravadas no volume do Postgres na PRIMEIRA subida. Trocar no .env
+   # depois não tem efeito — veja "Solução de problemas".
 
    docker compose up -d
    docker compose logs -f unleash   # acompanhar até o healthcheck passar
@@ -46,7 +49,9 @@ React que liga/desliga uma feature em tempo real através da Admin UI do Unleash
    yarn dev
    ```
 
-   Abra `http://localhost:5173`.
+   Abra `http://localhost:5173`. A porta é fixa: se estiver ocupada, o Vite falha em vez de subir em
+   outra (o CORS só libera as origens de `UNLEASH_FRONTEND_API_ORIGINS`). Libere a 5173 ou use
+   `yarn dev --port 5174` (já liberada no `.env.example`; outras portas precisam ser adicionadas lá).
 
 A tela ([`src/App.tsx`](src/App.tsx)) demonstra dois jeitos de usar o Unleash via
 `@unleash/proxy-client-react`:
@@ -69,6 +74,30 @@ Se o Docker estiver instalado direto dentro de uma distro WSL2 (Docker Engine, s
 - O WSL2 desliga a VM automaticamente após alguns minutos sem terminal aberto, o que derruba o
   Postgres e o Unleash. Mantenha um terminal WSL aberto ou configure `vmIdleTimeout=-1` em
   `%UserProfile%\.wslconfig` (seção `[wsl2]`).
+- O `localhost` do Windows pode não alcançar portas publicadas dentro do WSL2 (o navegador mostra
+  `ERR_CONNECTION_REFUSED` em `http://localhost:4242`, mesmo com o Unleash saudável). Para resolver,
+  use rede espelhada no `%UserProfile%\.wslconfig` e rode `wsl --shutdown`:
+
+  ```ini
+  [wsl2]
+  networkingMode=mirrored
+  vmIdleTimeout=-1
+  ```
+
+  Alternativa sem mexer no WSL: use o IP da distro (`wsl hostname -I`) no lugar de `localhost`,
+  tanto no navegador quanto em `VITE_UNLEASH_URL` (e reinicie o `yarn dev`). Esse IP muda quando a
+  VM reinicia.
+
+## Solução de problemas
+
+| Sintoma | Causa | Correção |
+|---|---|---|
+| `password authentication failed for user "unleash_user"` nos logs do Unleash (container reiniciando, `unhealthy`) | O volume do Postgres já existia e guarda a senha da primeira subida, diferente do `DATABASE_PASSWORD` atual do `.env`. | Recupere a senha antiga no `.env`, ou, **perdendo os dados**, recrie o banco: `docker compose down -v && docker compose up -d`. |
+| Login no Admin UI retorna 401 / `flag-seed` sai com `ERRO: login no Unleash ... falhou` | Unleash fora do ar, ou a `UNLEASH_ADMIN_PASSWORD` do `.env` não é a senha atual do admin (ela só é aplicada na criação do admin; se você trocou a senha pela UI, vale a nova). Também acontece se o `.env` tiver CRLF/BOM e você carregá-lo com `source` à mão (o `\r` vira parte da senha; o `yarn seed` já limpa isso). | Confira `docker compose ps`; use a senha atual do admin; em último caso, `docker compose down -v` (perde os dados) e suba de novo. Depois `yarn seed`. |
+| `ERR_CONNECTION_REFUSED` em `localhost:4242` (Docker no WSL2) | Encaminhamento de `localhost` do WSL2 não está funcionando. | Veja "Rodando via WSL2" acima. |
+| `Port 5173 is already in use` ao rodar `yarn dev` | Outro dev server ocupa a 5173. | Pare o outro processo ou use `yarn dev --port 5174`. |
+| Erro de CORS ou `401` na chamada a `/api/frontend` | Origem fora de `UNLEASH_FRONTEND_API_ORIGINS`, ou `VITE_UNLEASH_FRONTEND_TOKEN` diferente do `INIT_FRONTEND_API_TOKENS`. | Ajuste o `.env`, rode `docker compose up -d` (recria o Unleash se mudou a origem) e reinicie o `yarn dev` (o Vite só lê o `.env` ao iniciar). |
+| A tela não mostra a flag `vip-email` | O `flag-seed` falhou (veja `docker compose logs flag-seed`). | Corrija a causa (geralmente a senha do admin) e rode `yarn seed`. |
 
 ## Tokens de API
 
